@@ -1,0 +1,10 @@
+*.iml
+.svn
+.idea
+target
+*.class
+*.jar
+*.war
+*.log
+/scripts
+.#*
