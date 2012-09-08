@@ -10,20 +10,18 @@
          xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee
            http://java.sun.com/xml/ns/j2ee/web-app_2_4.xsd">
 
-    <description>Atmosphere REST Channel</description>
-    <display-name>Atmosphere REST Channel</display-name>
+    <description>Atmosphere Chat</description>
+    <display-name>Atmosphere Chat</display-name>
     <servlet>
         <description>AtmosphereServlet</description>
         <servlet-name>AtmosphereServlet</servlet-name>
         <servlet-class>org.atmosphere.cpr.AtmosphereServlet</servlet-class>
-        <!-- Uncomment if you want to use Servlet 3.0 Async Support
         <async-supported>true</async-supported>
-        -->
         <load-on-startup>0</load-on-startup>
     </servlet>
     <servlet-mapping>
         <servlet-name>AtmosphereServlet</servlet-name>
-        <url-pattern>/atm/*</url-pattern>
+        <url-pattern>/chat/*</url-pattern>
     </servlet-mapping>
 </web-app>
 
