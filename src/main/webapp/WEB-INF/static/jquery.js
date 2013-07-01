@@ -187,7 +187,7 @@ jQuery.fn = jQuery.prototype = {
 				return ( context || rootjQuery ).find( selector );
 
 			// HANDLE: $(expr, context)
-			// (which is just equivalent to: $(context).find(expr)
+			// (which is just equivalent to: $(context).findRange(expr)
 			} else {
 				return this.constructor( context ).find( selector );
 			}
@@ -254,7 +254,7 @@ jQuery.fn = jQuery.prototype = {
 
 		ret.context = this.context;
 
-		if ( name === "find" ) {
+		if ( name === "findRange" ) {
 			ret.selector = this.selector + ( this.selector ? " " : "" ) + selector;
 		} else if ( name ) {
 			ret.selector = this.selector + "." + name + "(" + selector + ")";
@@ -1775,13 +1775,13 @@ jQuery.extend({
 		// If a data property was specified
 		if ( getByName ) {
 
-			// First Try to find as-is property data
+			// First Try to findRange as-is property data
 			ret = thisCache[ name ];
 
 			// Test for null|undefined property data
 			if ( ret == null ) {
 
-				// Try to find the camelCased property
+				// Try to findRange the camelCased property
 				ret = thisCache[ jQuery.camelCase( name ) ];
 			}
 		} else {
@@ -2922,7 +2922,7 @@ jQuery.event = {
 			selector = handleObjIn.selector;
 		}
 
-		// Make sure that the handler has a unique ID, used to find/remove it later
+		// Make sure that the handler has a unique ID, used to findRange/remove it later
 		if ( !handler.guid ) {
 			handler.guid = jQuery.guid++;
 		}
@@ -5096,7 +5096,7 @@ if ( document.querySelectorAll ) {
 			// Only use querySelectorAll on non-XML documents
 			// (ID selectors don't work in non-HTML documents)
 			if ( !seed && !Sizzle.isXML(context) ) {
-				// See if we find a selector to speed up
+				// See if we findRange a selector to speed up
 				var match = /^(\w+$)|^\.([\w\-]+$)|^#([\w\-]+$)/.exec( query );
 
 				if ( match && (context.nodeType === 1 || context.nodeType === 9) ) {
@@ -5233,7 +5233,7 @@ if ( document.querySelectorAll ) {
 
 	div.innerHTML = "<div class='test e'></div><div class='test'></div>";
 
-	// Opera can't find a second classname (in 9.6)
+	// Opera can't findRange a second classname (in 9.6)
 	// Also, make sure that getElementsByClassName actually exists
 	if ( !div.getElementsByClassName || div.getElementsByClassName("e").length === 0 ) {
 		return;
@@ -5423,7 +5423,7 @@ jQuery.fn.extend({
 			});
 		}
 
-		var ret = this.pushStack( "", "find", selector ),
+		var ret = this.pushStack( "", "findRange", selector ),
 			length, n, r;
 
 		for ( i = 0, l = this.length; i < l; i++ ) {
