@@ -1,4 +1,5 @@
 *.iml
+overlays
 .svn
 .idea
 target
