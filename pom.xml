@@ -78,6 +78,34 @@
 
     <dependencies>
         <dependency>
+            <!-- Atmosphere's Comet Portable Runtime (CPR) -->
+            <groupId>org.atmosphere</groupId>
+            <artifactId>atmosphere-runtime</artifactId>
+            <version>0.9.7</version>
+        </dependency>
+        <dependency>
+            <!-- Atmosphere's Jersey module -->
+            <!-- Transitivity will pull all necessary dependencies -->
+            <!-- ie. Jersey 1.10 core, server, etc... -->
+            <groupId>org.atmosphere</groupId>
+            <artifactId>atmosphere-jersey</artifactId>
+            <version>0.9.7</version>
+        </dependency>
+        <dependency>
+            <!-- Atmosphere's jQuery plugin -->
+            <groupId>org.atmosphere</groupId>
+            <artifactId>atmosphere-jquery</artifactId>
+            <version>0.9.7</version>
+            <type>war</type>
+        </dependency>
+        <!-- Jersey's JSON mapper -->
+        <dependency>
+            <groupId>com.sun.jersey</groupId>
+            <artifactId>jersey-json</artifactId>
+            <version>1.10</version>
+        </dependency>
+
+        <dependency>
             <groupId>com.googlecode.jmockit</groupId>
             <artifactId>jmockit</artifactId>
             <version>0.999.15</version>

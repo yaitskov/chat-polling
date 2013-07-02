@@ -30,6 +30,42 @@
     </listener>
 
     <servlet>
+        <description>AtmosphereServlet</description>
+        <servlet-name>AtmosphereServlet</servlet-name>
+        <servlet-class>org.atmosphere.cpr.AtmosphereServlet</servlet-class>
+        <!-- Uncomment if you want to use Servlet 3.0 Async Support
+        <async-supported>true</async-supported>
+        -->
+        <!--<init-param>-->
+            <!--<param-name>org.atmosphere.cpr.broadcasterClass</param-name>-->
+            <!--<param-value>org.atmosphere.samples.pubsub.PubSubBroadcaster</param-value>-->
+        <!--</init-param>-->
+        <!-- Uncomment if you want to track broadcasted message using http session.
+        <init-param>
+            <param-name>org.atmosphere.cpr.sessionSupport</param-name>
+            <param-value>true</param-value>
+        </init-param>
+
+        Uncomment one of the above to support persistence and QoS so events are never lost
+        when browser is disconnected.
+
+        <init-param>
+            <param-name>org.atmosphere.cpr.broadcasterCacheClass</param-name>
+            <param-value>org.atmosphere.cache.SessionBroadcasterCache</param-value>
+        </init-param>
+       <init-param>
+            <param-name>org.atmosphere.cpr.broadcasterCacheClass</param-name>
+            <param-value>org.atmosphere.cache.HeaderBroadcasterCache</param-value>
+        </init-param>
+        -->
+        <load-on-startup>0</load-on-startup>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>AtmosphereServlet</servlet-name>
+        <url-pattern>/api/*</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
         <servlet-name>dispatcher</servlet-name>
         <servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
         <load-on-startup>1</load-on-startup>
