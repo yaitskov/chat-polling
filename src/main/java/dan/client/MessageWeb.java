@@ -7,12 +7,12 @@ import java.util.Date;
  */
 public class MessageWeb {
     public String content;
-    public Date create;
+    public Date created;
     public String author;
 
-    public MessageWeb(String content, Date create, String author) {
+    public MessageWeb(String content, Date created, String author) {
         this.content = content;
-        this.create = create;
+        this.created = created;
         this.author = author;
     }
 }

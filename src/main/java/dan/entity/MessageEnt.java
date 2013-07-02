@@ -6,24 +6,24 @@ import java.util.Date;
 /**
  * @author Daneel S. Yaitskov
  */
-@Entity
+@Entity(name = "Message")
 public class MessageEnt {
 
     @Id
     @GeneratedValue
     private int id;
 
-    @Column
+    @Column(length = 1000)
     private String body;
 
-    @Column
+    @Column(length = 100)
     private String author;
 
     @Column
     @Temporal(TemporalType.TIMESTAMP)
     private Date created;
 
-    @ManyToOne
+    @ManyToOne(optional = false)
     private Topic topic;
 
     public int getId() {

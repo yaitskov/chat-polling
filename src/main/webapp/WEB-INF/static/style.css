@@ -1,0 +1,8 @@
+
+.pages .current {
+    color: blue;
+}
+.pages span {
+    padding: 3px;
+    cursor:  pointer;
+}

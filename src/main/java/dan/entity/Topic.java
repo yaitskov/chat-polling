@@ -15,7 +15,7 @@ public class Topic {
     @GeneratedValue
     private int id;
 
-    @Column
+    @Column(length = 100)
     private String title;
 
     public int getId() {

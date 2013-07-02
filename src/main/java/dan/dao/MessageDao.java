@@ -1,5 +1,6 @@
 package dan.dao;
 
+import dan.utils.DateUtils;
 import dan.client.Page;
 import dan.entity.MessageEnt;
 import org.springframework.stereotype.Repository;
@@ -38,8 +39,12 @@ public class MessageDao extends Dao<MessageEnt> {
             "and m.created >= :s " +
             "order by m.created, m.id";
 
+    private static final String FIND_LAST_QUERY = "select m from Message m " +
+            "where m.topic.id = :t " +
+            "order by m.created desc, m.id desc";
 
-    private static final int PAGE_SIZE = 100;
+
+    private static final int PAGE_SIZE = 3;
 
     /**
      *
@@ -92,5 +97,16 @@ public class MessageDao extends Dao<MessageEnt> {
         q.setMaxResults(PAGE_SIZE);
 
         return q.getResultList();
+    }
+
+    public List<MessageEnt> findLastMessages(int topicId) {
+        Query q = em().createQuery(FIND_LAST_QUERY);
+        q.setParameter("t", topicId);
+        q.setMaxResults(1);
+        List<MessageEnt> last = q.getResultList();
+        if (last.isEmpty()) {
+            return last;
+        }
+        return findNearestAfter(topicId, 0, DateUtils.shiftHours(last.get(0).getCreated(), -2));
     }
 }

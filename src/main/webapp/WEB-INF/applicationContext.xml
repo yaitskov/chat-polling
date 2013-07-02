@@ -43,10 +43,39 @@
     </bean>
 
     <bean class="org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerAdapter">
+        <property name="webBindingInitializer">
+            <bean class="dan.exception.GlobalBinderInitializer" />
+        </property>
         <property name="messageConverters">
             <list>
                 <ref bean="jsonConverter"/>
             </list>
+        </property>
+    </bean>
+
+    <bean id="outboundExceptionAdapter"
+          class="org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerExceptionResolver">
+
+        <property name="messageConverters">
+            <list>
+                <ref bean="jsonConverter"/>
+            </list>
+        </property>
+    </bean>
+
+    <bean class="dan.exception.ExceptionHandler">
+        <property name="jview">
+            <bean class="dan.exception.JsonView" />
+        </property>
+        <property name="exceptionResponse">
+            <bean class="dan.exception.ValueClassTakesException">
+                <constructor-arg>
+                    <map key-type="java.lang.Class" value-type="java.lang.Class">
+                        <entry key="java.lang.Exception"
+                               value="dan.client.ErrorResponse" />
+                    </map>
+                </constructor-arg>
+            </bean>
         </property>
     </bean>
 
@@ -140,6 +169,16 @@
     <tx:annotation-driven transaction-manager="transactionManager"
                           mode="aspectj" proxy-target-class="true"/>
 
+    <bean id="ttNew" class="org.springframework.transaction.support.TransactionTemplate" >
+        <property name="transactionManager" ref="transactionManager" />
+        <property name="propagationBehaviorName" value="PROPAGATION_REQUIRES_NEW" />
+        <!--<property name="isolationLevelName" value="ISOLATION_SERIALIZABLE" />-->
+        <!--<property name="timeout" value="11111" />-->
+    </bean>
 
+    <bean id="ttReuse" class="org.springframework.transaction.support.TransactionTemplate" >
+        <property name="transactionManager" ref="transactionManager" />
+        <property name="propagationBehaviorName" value="PROPAGATION_REQUIRED" />
+    </bean>
 
 </beans>
