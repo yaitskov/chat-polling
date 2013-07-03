@@ -6,6 +6,8 @@ import dan.dao.MessageDao;
 import dan.dao.TopicDao;
 import dan.entity.MessageEnt;
 import dan.entity.Topic;
+import org.atmosphere.cpr.Broadcaster;
+import org.atmosphere.cpr.BroadcasterFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -67,7 +69,7 @@ public class Chat {
             throw new ValidationException("start date is greater than end date");
         }
         Page<MessageEnt> dbMessages = messageDao.findRange(topicId, start, end, page);
-        List<MessageWeb> webMessages = convertMessages(dbMessages.getItems());
+        List<MessageWeb> webMessages = MessageWeb.fromEntities(dbMessages.getItems());
         Page<MessageWeb> result = new Page<MessageWeb>(webMessages, dbMessages.getPages());
         return result;
     }
@@ -76,8 +78,8 @@ public class Chat {
     @RequestMapping(value = "/send")
     @ResponseBody
     public int sendMessage(@RequestParam("topic") int topicId,
-                          @RequestParam("content") String content,
-                          @RequestParam(value = "author", defaultValue = "") String author)
+                           @RequestParam("content") String content,
+                           @RequestParam(value = "author", defaultValue = "") String author)
     {
         logger.info("send message topic = {}, content = {}, author = {}",
                 new Object[]{ topicId, content, author});
@@ -88,34 +90,10 @@ public class Chat {
         message.setBody(content);
         message.setTopic(topic);
         messageDao.save(message);
-        return message.getId();
-    }
 
-    /**
-     *
-     * @param topicId
-     * @param number    number of last messages with the same post time on the client
-     * @param last      date and time of last message
-     * @return
-     */
-    @Transactional(readOnly = true)
-    @RequestMapping("/get")
-    @ResponseBody
-    public List<MessageWeb> selectNearestAfter(
-            @RequestParam("topic") int topicId,
-            @RequestParam(value = "number", defaultValue = "0") int number,
-            @RequestParam(value = "last", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) Date last)
-    {
-        logger.info("get messages topic = {}, number = {}, last = {}",
-                new Object[]{ topicId, number, last});
-        List<MessageEnt> dbMessages;
-        if (last == null) {
-            dbMessages = messageDao.findLastMessages(topicId);
-        } else {
-            dbMessages = messageDao.findNearestAfter(topicId, number, last);
-        }
-        List<MessageWeb> result = convertMessages(dbMessages);
-        return result;
+        Broadcaster bc = BroadcasterFactory.getDefault().lookup(topicId, true);
+        bc.broadcast("value is no matter. just signal to wake up.");
+        return message.getId();
     }
 
     @PostConstruct    
@@ -130,13 +108,5 @@ public class Chat {
                 logger.info("default topic was created");
             }
         });
-    }
-
-    private List<MessageWeb> convertMessages(List<MessageEnt> dbMessages) {
-        List<MessageWeb> webMessages = new ArrayList<MessageWeb>(dbMessages.size());
-        for (MessageEnt ent : dbMessages) {
-            webMessages.add(new MessageWeb(ent.getBody(), ent.getCreated(), ent.getAuthor()));
-        }
-        return webMessages;
     }
 }

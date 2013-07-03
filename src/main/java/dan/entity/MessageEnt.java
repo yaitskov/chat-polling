@@ -7,11 +7,7 @@ import java.util.Date;
  * @author Daneel S. Yaitskov
  */
 @Entity(name = "Message")
-public class MessageEnt {
-
-    @Id
-    @GeneratedValue
-    private int id;
+public class MessageEnt extends AbstractEntity {
 
     @Column(length = 1000)
     private String body;
@@ -25,14 +21,6 @@ public class MessageEnt {
 
     @ManyToOne(optional = false)
     private Topic topic;
-
-    public int getId() {
-        return id;
-    }
-
-    public void setId(int id) {
-        this.id = id;
-    }
 
     public String getBody() {
         return body;

@@ -9,22 +9,10 @@ import javax.persistence.Id;
  * @author Daneel S. Yaitskov
  */
 @Entity
-public class Topic {
-
-    @Id
-    @GeneratedValue
-    private int id;
+public class Topic extends AbstractEntity {
 
     @Column(length = 100)
     private String title;
-
-    public int getId() {
-        return id;
-    }
-
-    public void setId(int id) {
-        this.id = id;
-    }
 
     public String getTitle() {
         return title;

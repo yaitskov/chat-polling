@@ -1,5 +1,5 @@
 function scheduleFunction(f) {
-    setTimeout(f, 2000);
+    setTimeout(f, 0);
 }
 
 function renderMessage(item) {
@@ -20,8 +20,12 @@ function renderMessage(item) {
 function displayError(display, error) {
     var err = $("<div class='alert alert-error'/>");
     err.text(error.error + ": " + error.message);
-    display.append(err);
-
+    var last = display.find(">div:last-child");
+    if (last.is(".alert-error")) {
+        console.error(err.text());
+    } else {
+        display.append(err);
+    }
 }
 
 function getCurrentTz() {
@@ -121,10 +125,11 @@ function pullMessages() {
     var data = { topic: $("#message-form input[name=topic]").val(),
                  number: display.data("number") };
     if (display.data('last')) {
-        data.last = new Date(display.data('last')).toISOString();
+        data.last = display.data('last');
     }
     $.ajax({
-        url: "/get",
+        url: "/api/get",
+        dataType: 'json',
         data: data
     }).done(function (body) {
             if (body.error) {
@@ -151,6 +156,12 @@ $(document).ready(function () {
         var form = $(this);
         renderHistory(form, true);
         return false;
+    });
+
+    $("#chat textarea").keypress(function (e) {
+        if (e.keyCode == 13 || e.keyCode == 10) {
+            $("#message-form").submit();
+        }
     });
 
     $("#message-form").submit(function () {
