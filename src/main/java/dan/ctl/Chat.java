@@ -74,13 +74,24 @@ public class Chat {
         return result;
     }
 
-    @Transactional
+
     @RequestMapping(value = "/send")
     @ResponseBody
     public int sendMessage(@RequestParam("topic") int topicId,
                            @RequestParam("content") String content,
                            @RequestParam(value = "author", defaultValue = "") String author)
     {
+        MessageEnt message = persistMessage(topicId, content, author);
+        Broadcaster bc = BroadcasterFactory.getDefault().lookup(topicId, true);
+        bc.broadcast("value is no matter. just signal to wake up.");
+        return message.getId();
+    }
+
+    /**
+     * Separate function to flush session before broadcasting.
+     */
+    @Transactional
+    private MessageEnt persistMessage(int topicId, String content, String author) {
         logger.info("send message topic = {}, content = {}, author = {}",
                 new Object[]{ topicId, content, author});
         Topic topic = topicDao.find(topicId);
@@ -90,10 +101,7 @@ public class Chat {
         message.setBody(content);
         message.setTopic(topic);
         messageDao.save(message);
-
-        Broadcaster bc = BroadcasterFactory.getDefault().lookup(topicId, true);
-        bc.broadcast("value is no matter. just signal to wake up.");
-        return message.getId();
+        return message;
     }
 
     @PostConstruct    
