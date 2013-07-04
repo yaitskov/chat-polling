@@ -5,6 +5,7 @@ import com.google.common.collect.Lists;
 import dan.client.MessageWeb;
 import dan.dao.MessageDao;
 import dan.entity.MessageEnt;
+import dan.utils.Dated;
 import org.atmosphere.cpr.AtmosphereRequest;
 import org.atmosphere.cpr.AtmosphereResource;
 import org.atmosphere.cpr.AtmosphereResourceImpl;
@@ -101,14 +102,14 @@ public class ChatMessageBroadcasterCache implements BroadcasterCache {
     /**
      * {@inheritDoc}
      */
-    public final synchronized void addToCache(String id, final AtmosphereResource resource, final Object object) {
+    public final void addToCache(String id, final AtmosphereResource resource, final Object object) {
         try {
             logger.info("Adding message for resource: {}, object: {}", resource, mapper.writeValueAsString(object));
         } catch (IOException e) {
             logger.error("{}", e);
         }
 
-        CachedMessage cm = new CachedMessage(object, ((MessageWeb)object).created.getTime());
+        CachedMessage cm = new CachedMessage(object, ((Dated)object).getCreated().getTime());
         try {
             logger.info("before add: {}", mapper.writeValueAsString(queue));
         } catch (IOException e) {
@@ -125,7 +126,7 @@ public class ChatMessageBroadcasterCache implements BroadcasterCache {
     /**
      * {@inheritDoc}
      */
-    public final synchronized List<Object> retrieveFromCache(String id, AtmosphereResource r) {
+    public final List<Object> retrieveFromCache(String id, AtmosphereResource r) {
         List result = retrieveLastMessage(id, r);
         try {
             logger.info("objectts from cache: {}", mapper.writeValueAsString(result));

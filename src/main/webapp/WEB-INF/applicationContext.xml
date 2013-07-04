@@ -35,7 +35,7 @@
     <mvc:annotation-driven/>
 
     <bean id="std-executor" class="java.util.concurrent.Executors"
-          factory-method="newFixedThreadPool">
+          factory-method="newScheduledThreadPool">
         <constructor-arg value="4" />
     </bean>
 

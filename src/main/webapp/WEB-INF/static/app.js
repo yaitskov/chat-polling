@@ -104,6 +104,11 @@ function renderNewMessages(body, display) {
     }
 }
 
+/**
+ * I tried to use HTTP header to pass message date
+ * but ajax starts to bug: done and fail callbacks are called multiple time.
+ * The bottom line messages are duplicated profoundly.
+ */
 function pullMessages() {
     var display = $("#chat .messages");
     var data = { topic: $("#message-form input[name=topic]").val(),
