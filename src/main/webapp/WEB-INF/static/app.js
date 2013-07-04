@@ -1,5 +1,5 @@
 function scheduleFunction(f) {
-    setTimeout(f, 0);
+    setTimeout(f, 10);
 }
 
 function renderMessage(item) {
@@ -97,50 +97,45 @@ function renderPaging(root, pages) {
 }
 
 function renderNewMessages(body, display) {
-    var last = display.data("last");
-    var number = display.data("number");
     for (var i in body) {
         var item = body[i];
         var message = renderMessage(item);
         display.append(message);
-
-        if (last) {
-            if (last == item.created) {
-                number += 1;
-            } else {
-                number = 1;
-                last = item.created;
-            }
-        } else {
-            last = item.created;
-            number = 1;
-        }
     }
-    display.data("last", last);
-    display.data("number", number);
 }
 
 function pullMessages() {
     var display = $("#chat .messages");
-    var data = { topic: $("#message-form input[name=topic]").val(),
-                 number: display.data("number") };
-    if (display.data('last')) {
-        data.last = display.data('last');
-    }
+    var data = { topic: $("#message-form input[name=topic]").val() };
+    var xCacheDate = display.data("x-cache-date");
+    console.log("pullMessage 1 start: cache " + xCacheDate);
     $.ajax({
         url: "/api/get",
         dataType: 'json',
-        data: data
-    }).done(function (body) {
+        headers: {
+            "X-Cache-Date": xCacheDate
+        },
+        success: function (body, status, jqXHR) {
             if (body.error) {
                 displayError(display, body);
             } else {
+                // X-CACHE-DATE is provided Atmosphere cache to detect new messages
+                // without looking into DB.
+                var xCacheDateNew = jqXHR.getResponseHeader("X-Cache-Date");
+                console.log("pullMessage 3 in body newcache " + xCacheDateNew);
+                if (xCacheDateNew && xCacheDateNew.match(/^[0-9]+$/)) {
+                    display.data("x-cache-date", xCacheDateNew);
+                }
                 renderNewMessages(body, display);
             }
             scheduleFunction(pullMessages);
-        }).fail(function () {
+        },
+        error: function () {
+            console.log("pullMessage 4 fail  newcache " + xCacheDate);
             scheduleFunction(pullMessages);
-        });
+        },
+        data: data
+    });
 }
 
 $(document).ready(function () {

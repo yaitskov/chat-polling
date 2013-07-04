@@ -1,5 +1,6 @@
 package dan.ctl;
 
+import com.google.common.collect.Lists;
 import dan.client.MessageWeb;
 import dan.client.Page;
 import dan.dao.MessageDao;
@@ -83,7 +84,7 @@ public class Chat {
     {
         MessageEnt message = persistMessage(topicId, content, author);
         Broadcaster bc = BroadcasterFactory.getDefault().lookup(topicId, true);
-        bc.broadcast("value is no matter. just signal to wake up.");
+        bc.broadcast(MessageWeb.fromEntity(message));
         return message.getId();
     }
 

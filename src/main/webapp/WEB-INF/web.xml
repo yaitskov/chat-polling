@@ -62,12 +62,13 @@
             <!--<param-name>org.atmosphere.cpr.broadcasterCacheClass</param-name>-->
             <!--<param-value>dan.ctl.TopicCache</param-value>-->
         <!--</init-param>-->
-        <!--
+
        <init-param>
             <param-name>org.atmosphere.cpr.broadcasterCacheClass</param-name>
-            <param-value>org.atmosphere.cache.HeaderBroadcasterCache</param-value>
+            <param-value>dan.ctl.BetterHeaderBroadcasterCache</param-value>
+            <!--<param-value>org.atmosphere.cache.HeaderBroadcasterCache</param-value>-->
         </init-param>
-        -->
+
         <load-on-startup>0</load-on-startup>
     </servlet>
     <servlet-mapping>

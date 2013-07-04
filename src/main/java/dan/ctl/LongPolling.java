@@ -1,6 +1,7 @@
 package dan.ctl;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.collect.Lists;
 import dan.client.ErrorResponse;
 import dan.client.MessageWeb;
 import dan.dao.MessageDao;
@@ -15,11 +16,10 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 import java.io.IOException;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 /**
  *
@@ -42,21 +42,12 @@ public class LongPolling implements AtmosphereHandler {
         logger.info("Initializing LongPolling");
     }
 
-
-    private static class Update {
+    private static class NewMessageReqParams {
         public int topicId;
-        /**
-         * number of last messages with the same post time on the client
-         */
-        public int number;
-        /**
-         * date and time of last message
-         */
-        public Date last;
     }
 
-    protected Update createFromRequest(AtmosphereRequest request) {
-        Update result = new Update();
+    protected NewMessageReqParams createFromRequest(AtmosphereRequest request) {
+        NewMessageReqParams result = new NewMessageReqParams();
         String topicS = request.getParameter("topic");
         if (topicS == null) {
             throw new IllegalArgumentException("topic parameter is required");
@@ -67,35 +58,6 @@ public class LongPolling implements AtmosphereHandler {
                 throw new IllegalArgumentException("'topic' parameter is not number");
             }
         }
-        String numberS =  request.getParameter("number");
-        if (numberS != null) {
-            try {
-            result.number = Integer.parseInt(numberS);
-            } catch (NumberFormatException e) {
-                throw new IllegalArgumentException("'number' parameter is not number");
-            }
-        }
-        String lastS = request.getParameter("last");
-        if (lastS != null) {
-            try {
-                result.last = new Date(Long.parseLong(lastS));
-            } catch (NumberFormatException e) {
-                throw new IllegalArgumentException("'last' parameter invalid");
-            }
-        }
-        return result;
-    }
-
-    @Transactional(readOnly = true)
-    public List<MessageWeb> selectNearestAfter(Update parameters) {
-        List<MessageEnt> dbMessages;
-        if (parameters.last == null) {
-            dbMessages = messageDao.findLastMessages(parameters.topicId);
-        } else {
-            dbMessages = messageDao.findNearestAfter(parameters.topicId,
-                    parameters.number, parameters.last);
-        }
-        List<MessageWeb> result = MessageWeb.fromEntities(dbMessages);
         return result;
     }
 
@@ -115,19 +77,13 @@ public class LongPolling implements AtmosphereHandler {
             throws IOException
     {
         try {
-            // encoding http filter ignored in atmosphere servlet
-            // resource.getResponse().setContentType("application/json; charset=UTF-8");
             logger.info("on request");
-             AtmosphereRequest request = resource.getRequest();
-            Update parameters = createFromRequest(request);
+            AtmosphereRequest request = resource.getRequest();
+            NewMessageReqParams parameters = createFromRequest(request);
             setTopicBroadcaster(resource, parameters.topicId);
-            List<MessageWeb> result = selectNearestAfter(parameters);
-            if (result.isEmpty()) {
-                // until some body write a message or timeout
-                resource.suspend();
-            } else {
-                writeResponse(resource, result);
-            }
+            // rely on cache. if it has undelivered messages then
+            // this request will be resumed.
+            resource.suspend(30000, false);
         } catch (IllegalArgumentException e) {
             writeResponse(resource, new ErrorResponse(e));
         }
@@ -144,24 +100,24 @@ public class LongPolling implements AtmosphereHandler {
      */
     @Override
     public void onStateChange(AtmosphereResourceEvent event)
-            throws IOException
-    {
+            throws IOException {
         logger.info("on state change");
         AtmosphereResource resource = event.getResource();
 
-        if (event.isSuspended()) {
-            Update parameters = createFromRequest(resource.getRequest());
-            List<MessageWeb> result = selectNearestAfter(parameters);
-            writeResponse(resource, result);
-            resource.resume();
-        } else if (event.isCancelled() || event.isResumedOnTimeout()) {
+        if (event.isCancelled() || event.isResumedOnTimeout()) {
             writeResponse(resource, new ArrayList());
+        } else {
+            if (event.getMessage() instanceof List) {
+                writeResponse(resource, event.getMessage());
+            } else {
+                writeResponse(resource, Lists.newArrayList(event.getMessage()));
+            }
+            resource.resume();
         }
     }
 
     @Override
     public void destroy() {
         logger.info("destroy atmo handler");
-
     }
 }
