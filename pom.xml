@@ -79,6 +79,12 @@
 
     <dependencies>
         <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+            <version>14.0.1</version>
+        </dependency>
+        <!--require for CometFilter interface-->
+        <dependency>
             <groupId>org.apache.tomcat</groupId>
             <artifactId>catalina</artifactId>
             <version>6.0.35</version>

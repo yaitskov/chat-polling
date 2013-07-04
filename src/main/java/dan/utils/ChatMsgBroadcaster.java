@@ -21,7 +21,7 @@ public class ChatMsgBroadcaster {
         return new ChatMsgBroadcaster(bc);
     }
 
-    public void broadcast(Dated object) {
+    public void broadcast(DatedIdentified object) {
         broadcaster.broadcast(object);
     }
 }
