@@ -34,6 +34,11 @@
     <context:annotation-config/>
     <mvc:annotation-driven/>
 
+    <bean id="std-executor" class="java.util.concurrent.Executors"
+          factory-method="newFixedThreadPool">
+        <constructor-arg value="4" />
+    </bean>
+
     <bean id="restTemplate" class="org.springframework.web.client.RestTemplate">
         <property name="messageConverters">
             <list>

@@ -1,6 +1,7 @@
 package dan.client;
 
 import dan.entity.MessageEnt;
+import dan.utils.Dated;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -9,7 +10,7 @@ import java.util.List;
 /**
  * @author Daneel S. Yaitskov
  */
-public class MessageWeb {
+public class MessageWeb implements Dated {
     public String content;
     public Date created;
     public String author;
@@ -30,5 +31,10 @@ public class MessageWeb {
             webMessages.add(fromEntity(ent));
         }
         return webMessages;
+    }
+
+    @Override
+    public Date getCreated() {
+        return created;
     }
 }

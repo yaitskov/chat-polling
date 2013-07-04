@@ -14,16 +14,12 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Configurable;
 import org.springframework.beans.factory.annotation.Value;
 
-import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.Iterator;
 import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 
 import static org.atmosphere.cpr.HeaderConfig.X_CACHE_DATE;
 
@@ -31,18 +27,17 @@ import static org.atmosphere.cpr.HeaderConfig.X_CACHE_DATE;
  * @author Daneel S. Yaitskov
  */
 @Configurable
-public class BetterHeaderBroadcasterCache implements BroadcasterCache {
+public class ChatMessageBroadcasterCache implements BroadcasterCache {
 
-    private static final Logger logger = LoggerFactory.getLogger(BetterHeaderBroadcasterCache.class);
+    private static final Logger logger = LoggerFactory.getLogger(ChatMessageBroadcasterCache.class);
 
     protected final List<CachedMessage> queue = new CopyOnWriteArrayList<CachedMessage>();
 
-    protected ScheduledExecutorService reaper = Executors.newSingleThreadScheduledExecutor();
-
-    protected int maxCachedinMs = 1000 * 5 * 60;
+    @Resource(name = "std-executor")
+    protected ScheduledExecutorService reaper;
 
     @Value("${cache-item-live}")
-    private int cacheItemLive;
+    protected int maxCachedinMs = 1000 * 5 * 60;
 
     @Resource
     private MessageDao messageDao;
@@ -51,36 +46,7 @@ public class BetterHeaderBroadcasterCache implements BroadcasterCache {
     private ObjectMapper mapper;
 
     private boolean initialized;
-
-    @PostConstruct
-    private void init() {
-        maxCachedinMs = cacheItemLive;
-    }
-
-    private void loadInitCache(String id, AtmosphereResource ar) {
-        try {
-            List<MessageEnt> last = messageDao.findLastMessages(Integer.parseInt(id));
-            for (MessageEnt messageEnt : last) {
-                addToCache(id, ar, MessageWeb.fromEntity(messageEnt));
-            }
-        } catch (NumberFormatException e) {
-            logger.error("failed load cache for broadcaster '{}' {}", id, e);
-        }
-    }
-
-    private void tryToInit(String id, AtmosphereResource ar) {
-        if (!initialized) {
-            synchronized (this) {
-                if (!initialized) {
-                    logger.info("preload cache");
-                    initialized = true;
-                    loadInitCache(id, ar);
-                }
-            }
-        }
-    }
-
-
+    private Future oldMsgCleanerTask;
 
     public List<Object> retrieveLastMessage(String id, AtmosphereResource ar) {
         AtmosphereResourceImpl r = AtmosphereResourceImpl.class.cast(ar);
@@ -106,8 +72,7 @@ public class BetterHeaderBroadcasterCache implements BroadcasterCache {
      * {@inheritDoc}
      */
     public final void start() {
-        reaper.scheduleAtFixedRate(new Runnable() {
-
+        oldMsgCleanerTask = reaper.scheduleAtFixedRate(new Runnable() {
             public void run() {
                 Iterator<CachedMessage> i = queue.iterator();
                 CachedMessage message;
@@ -130,7 +95,7 @@ public class BetterHeaderBroadcasterCache implements BroadcasterCache {
      * {@inheritDoc}
      */
     public final void stop() {
-        reaper.shutdown();
+        oldMsgCleanerTask.cancel(true);
     }
 
     /**
@@ -193,7 +158,6 @@ public class BetterHeaderBroadcasterCache implements BroadcasterCache {
         public final Object message;
         public final long currentTime;
 
-
         public CachedMessage() {
             this.currentTime = System.currentTimeMillis();
             this.message = null;
@@ -219,6 +183,28 @@ public class BetterHeaderBroadcasterCache implements BroadcasterCache {
                 return "";
             }
         }
+    }
 
+    private void loadInitCache(String id, AtmosphereResource ar) {
+        try {
+            List<MessageEnt> last = messageDao.findLastMessages(Integer.parseInt(id));
+            for (MessageEnt messageEnt : last) {
+                addToCache(id, ar, MessageWeb.fromEntity(messageEnt));
+            }
+        } catch (NumberFormatException e) {
+            logger.error("failed load cache for broadcaster '{}' {}", id, e);
+        }
+    }
+
+    private void tryToInit(String id, AtmosphereResource ar) {
+        if (!initialized) {
+            synchronized (this) {
+                if (!initialized) {
+                    logger.info("preload cache");
+                    initialized = true;
+                    loadInitCache(id, ar);
+                }
+            }
+        }
     }
 }

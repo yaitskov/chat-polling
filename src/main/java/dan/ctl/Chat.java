@@ -7,6 +7,7 @@ import dan.dao.MessageDao;
 import dan.dao.TopicDao;
 import dan.entity.MessageEnt;
 import dan.entity.Topic;
+import dan.utils.ChatMsgBroadcaster;
 import org.atmosphere.cpr.Broadcaster;
 import org.atmosphere.cpr.BroadcasterFactory;
 import org.slf4j.Logger;
@@ -83,8 +84,7 @@ public class Chat {
                            @RequestParam(value = "author", defaultValue = "") String author)
     {
         MessageEnt message = persistMessage(topicId, content, author);
-        Broadcaster bc = BroadcasterFactory.getDefault().lookup(topicId, true);
-        bc.broadcast(MessageWeb.fromEntity(message));
+        ChatMsgBroadcaster.findOrCreate(topicId).broadcast(MessageWeb.fromEntity(message));
         return message.getId();
     }
 
