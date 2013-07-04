@@ -106,32 +106,23 @@ function renderNewMessages(body, display) {
 
 function pullMessages() {
     var display = $("#chat .messages");
-    var data = { topic: $("#message-form input[name=topic]").val() };
-    var xCacheDate = display.data("x-cache-date");
-    console.log("pullMessage 1 start: cache " + xCacheDate);
+    var data = { topic: $("#message-form input[name=topic]").val(),
+                 'X-Cache-Date': display.data("x-cache-date") };
+
+    console.log("pullMessage 1 start: cache " + display.data("x-cache-date"));
     $.ajax({
         url: "/api/get",
         dataType: 'json',
-        headers: {
-            "X-Cache-Date": xCacheDate
-        },
         success: function (body, status, jqXHR) {
             if (body.error) {
                 displayError(display, body);
-            } else {
-                // X-CACHE-DATE is provided Atmosphere cache to detect new messages
-                // without looking into DB.
-                var xCacheDateNew = jqXHR.getResponseHeader("X-Cache-Date");
-                console.log("pullMessage 3 in body newcache " + xCacheDateNew);
-                if (xCacheDateNew && xCacheDateNew.match(/^[0-9]+$/)) {
-                    display.data("x-cache-date", xCacheDateNew);
-                }
+            } else if (body instanceof Array && body.length) {
                 renderNewMessages(body, display);
+                display.data('x-cache-date', body[body.length - 1].created);
             }
             scheduleFunction(pullMessages);
         },
         error: function () {
-            console.log("pullMessage 4 fail  newcache " + xCacheDate);
             scheduleFunction(pullMessages);
         },
         data: data

@@ -88,21 +88,16 @@ public class BetterHeaderBroadcasterCache implements BroadcasterCache {
         if (!r.isInScope()) return result;
 
         AtmosphereRequest request = r.getRequest();
-        String dateString = request.getHeader(X_CACHE_DATE);
+        String dateString = request.getParameter(X_CACHE_DATE);
         if (dateString == null) return null;
         tryToInit(id, ar);
 
         long currentTime = Long.valueOf(dateString);
-        CachedMessage last = null;
         for (CachedMessage cm : queue) {
             logger.info("cmp time {} > {}", cm.currentTime(), currentTime);
             if (cm.currentTime() > currentTime) {
                 result.add(cm.message());
-                last = cm;
             }
-        }
-        if (!result.isEmpty()) {
-            cache(id, ar, last);
         }
         return result;
     }
@@ -131,13 +126,6 @@ public class BetterHeaderBroadcasterCache implements BroadcasterCache {
         }, 0, 60, TimeUnit.SECONDS);
     }
 
-    public void setExecutorService(ScheduledExecutorService reaper){
-        if (reaper != null) {
-            stop();
-        }
-        this.reaper = reaper;
-    }
-
     /**
      * {@inheritDoc}
      */
@@ -155,7 +143,7 @@ public class BetterHeaderBroadcasterCache implements BroadcasterCache {
             logger.error("{}", e);
         }
 
-        CachedMessage cm = new CachedMessage(object, System.currentTimeMillis(), null);
+        CachedMessage cm = new CachedMessage(object, ((MessageWeb)object).created.getTime());
         try {
             logger.info("before add: {}", mapper.writeValueAsString(queue));
         } catch (IOException e) {
@@ -168,17 +156,6 @@ public class BetterHeaderBroadcasterCache implements BroadcasterCache {
             logger.error("{}", e);
         }
     }
-
-    public void cache(String id, AtmosphereResource ar, CachedMessage cm) {
-        long time = cm.currentTime();
-
-        AtmosphereResourceImpl r = AtmosphereResourceImpl.class.cast(ar);
-        if (r != null && r.isInScope() && !r.getResponse().isCommitted()) {
-            logger.info("set x-cache-date to {}", time);
-            r.getResponse().addHeader(X_CACHE_DATE, String.valueOf(time));
-        }
-    }
-
 
     /**
      * {@inheritDoc}
@@ -215,22 +192,16 @@ public class BetterHeaderBroadcasterCache implements BroadcasterCache {
 
         public final Object message;
         public final long currentTime;
-        public CachedMessage next;
-        public final boolean isTail;
-        public Object t;
 
-        public CachedMessage(boolean isTail) {
+
+        public CachedMessage() {
             this.currentTime = System.currentTimeMillis();
             this.message = null;
-            this.next = null;
-            this.isTail = isTail;
         }
 
-        public CachedMessage(Object message, long currentTime, CachedMessage next) {
+        public CachedMessage(Object message, long currentTime) {
             this.currentTime = currentTime;
             this.message = message;
-            this.next = next;
-            this.isTail = false;
         }
 
         public Object message() {
@@ -241,34 +212,12 @@ public class BetterHeaderBroadcasterCache implements BroadcasterCache {
             return currentTime;
         }
 
-        public CachedMessage next() {
-            return next;
-        }
-
-        public CachedMessage next(CachedMessage next) {
-            this.next = next;
-            return next;
-        }
-
         public String toString() {
             if (message != null) {
                 return message.toString();
             } else {
                 return "";
             }
-        }
-
-        public boolean isTail() {
-            return isTail;
-        }
-
-        public CachedMessage setKey(Object t) {
-            this.t = t;
-            return this;
-        }
-
-        public Object getKey() {
-            return t;
         }
 
     }
