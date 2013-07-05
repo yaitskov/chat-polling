@@ -70,6 +70,12 @@ function normalizeTime(form) {
     normalizeTimeIfRequired(form, "input[name=end]", tz);
 }
 
+function scrollToEnd() {
+    $('html').animate({
+        scrollTop: $("#message-form").offset().top
+    }, 2000);
+}
+
 function renderHistory(form, reset) {
     if (form.data("processing")) {
         return;
@@ -159,8 +165,10 @@ function pullMessages() {
         success: function (body, status, jqXHR) {
             if (body.error) {
                 displayError(display, body);
+                scrollToEnd();
             } else if (body instanceof Array && body.length) {
                 renderNewMessages(body, display);
+                scrollToEnd();
             }
             scheduleFunction(pullMessages);
         },
