@@ -89,12 +89,15 @@ public class ChatMessageBroadcasterCache implements BroadcasterCache {
         if (!r.isInScope()) return ImmutableList.of();
         AtmosphereRequest request = r.getRequest();
         Set<Integer> lastClientMessages = lastClientMessages(request);
-        if (lastClientMessages.isEmpty()) {
+        long createdAfter = Long.parseLong(request.getParameter("firstDate"));
+        if (lastClientMessages.isEmpty() && createdAfter == 0) {
             return loadInitCache(topicId);
         }
         List<DatedIdentified> result = Lists.newArrayList();
         for (DatedIdentified item : cache) {
-            if (!lastClientMessages.contains(item.getId())) {
+            if (item.getCreated().getTime() > createdAfter
+                && !lastClientMessages.contains(item.getId()))
+            {
                 result.add(item);
             }
         }

@@ -21,15 +21,23 @@ function renderMessage(item) {
 
 function findIdsOfRecentMessages() {
     var result = [];
-    $("#chat .messages > div.message").slice(-20).each(
-        function (i, item) {
-            item = $(item);
-            if (item.data("id")) {
-                result.push(item.data("id"));
+    var previousCreation = 0;
+    var lastMessages = $("#chat .messages > div.message").slice(-20);
+    for (var i = 0; i < lastMessages.length; ++i) {
+        item = $(lastMessages.get(i));
+        if (item.data("id")) {
+            if (result.length !== 0) {
+                var id = item.data("id");
+                result.push(id);
+            } else if (previousCreation === 0) {
+                previousCreation = 0 + item.data("created");
+            } else if (previousCreation < item.data("created")) {
+                var id = item.data("id");
+                result.push(id);
             }
         }
-    );
-    return result.join(" ");
+    }
+    return { ids: result, createdAfter: previousCreation };
 }
 
 function displayError(display, error) {
@@ -140,9 +148,10 @@ function renderNewMessages(body, display) {
  */
 function pullMessages() {
     var display = $("#chat .messages");
+    var idsAndBorder = findIdsOfRecentMessages();
     var data = { topic: $("#message-form input[name=topic]").val(),
-                 'KnownIds': findIdsOfRecentMessages() };
-
+                 'KnownIds': idsAndBorder.ids.join(" "),
+                 'firstDate': idsAndBorder.createdAfter };
     console.log("pullMessage 1 start: cache " + data.KnownIds);
     $.ajax({
         url: "/api/get",

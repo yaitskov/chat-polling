@@ -101,27 +101,27 @@
             <artifactId>atmosphere-runtime</artifactId>
             <version>${atmosphere.version}</version>
         </dependency>
-        <dependency>
-            <!-- Atmosphere's Jersey module -->
-            <!-- Transitivity will pull all necessary dependencies -->
-            <!-- ie. Jersey 1.10 core, server, etc... -->
-            <groupId>org.atmosphere</groupId>
-            <artifactId>atmosphere-jersey</artifactId>
-            <version>${atmosphere.version}</version>
-        </dependency>
-        <dependency>
-            <!-- Atmosphere's jQuery plugin -->
-            <groupId>org.atmosphere</groupId>
-            <artifactId>atmosphere-jquery</artifactId>
-            <version>${atmosphere.version}</version>
-            <type>war</type>
-        </dependency>
-        <!-- Jersey's JSON mapper -->
-        <dependency>
-            <groupId>com.sun.jersey</groupId>
-            <artifactId>jersey-json</artifactId>
-            <version>1.12</version>
-        </dependency>
+        <!--<dependency>-->
+            <!--&lt;!&ndash; Atmosphere's Jersey module &ndash;&gt;-->
+            <!--&lt;!&ndash; Transitivity will pull all necessary dependencies &ndash;&gt;-->
+            <!--&lt;!&ndash; ie. Jersey 1.10 core, server, etc... &ndash;&gt;-->
+            <!--<groupId>org.atmosphere</groupId>-->
+            <!--<artifactId>atmosphere-jersey</artifactId>-->
+            <!--<version>${atmosphere.version}</version>-->
+        <!--</dependency>-->
+        <!--<dependency>-->
+            <!--&lt;!&ndash; Atmosphere's jQuery plugin &ndash;&gt;-->
+            <!--<groupId>org.atmosphere</groupId>-->
+            <!--<artifactId>atmosphere-jquery</artifactId>-->
+            <!--<version>${atmosphere.version}</version>-->
+            <!--<type>war</type>-->
+        <!--</dependency>-->
+        <!--&lt;!&ndash; Jersey's JSON mapper &ndash;&gt;-->
+        <!--<dependency>-->
+            <!--<groupId>com.sun.jersey</groupId>-->
+            <!--<artifactId>jersey-json</artifactId>-->
+            <!--<version>1.12</version>-->
+        <!--</dependency>-->
 
         <dependency>
             <groupId>com.googlecode.jmockit</groupId>
