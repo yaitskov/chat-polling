@@ -22,7 +22,7 @@
 <body>
 <div class="container">
     <div class="well">
-        <div id="message-template" class="hide">
+        <div id="message-template" class="hide message">
             <div class="author">From <span class="name"></span></div>
             <div class="date"></div>
             <pre class="content"></pre>
@@ -55,7 +55,7 @@
 
         <div class="tab-content">
             <div class="tab-pane active" id="chat">
-                <div class="messages" data-x-cache-date="0">
+                <div class="messages">
                 </div>
                 <form id="message-form">
                     <input type="hidden" name="topic" value="1"/>

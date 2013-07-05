@@ -75,7 +75,7 @@ public class ChatMessageBroadcasterCache implements BroadcasterCache {
 
     private Set<Integer> lastClientMessages(AtmosphereRequest request) {
         String knownIds = request.getParameter("KnownIds");
-        if (knownIds == null) {
+        if (knownIds == null || knownIds.trim().isEmpty()) {
             return ImmutableSet.of();
         }
         String[] ids = knownIds.split(" ", CACHE_SIZE);

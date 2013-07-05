@@ -11,10 +11,25 @@ function renderMessage(item) {
     } else {
         message.find(".author").remove();
     }
+    message.data('created', item.created);
+    message.data("id", item.id);
     message.find(".date").text(new Date(item.created) + "");
     message.find(".content").text(item.content);
     message.removeClass("hide");
     return message;
+}
+
+function findIdsOfRecentMessages() {
+    var result = [];
+    $("#chat .messages > div.message").slice(-20).each(
+        function (i, item) {
+            item = $(item);
+            if (item.data("id")) {
+                result.push(item.data("id"));
+            }
+        }
+    );
+    return result.join(" ");
 }
 
 function displayError(display, error) {
@@ -100,7 +115,21 @@ function renderNewMessages(body, display) {
     for (var i in body) {
         var item = body[i];
         var message = renderMessage(item);
-        display.append(message);
+        var created = 0 + item.created;
+        var messages = display.find(".message");
+        if (messages.length === 0) {
+            display.append(message);
+        } else if (created > $(messages.get(messages.length - 1)).data('created')) {
+            display.append(message);
+        } else {
+            for (var j = 0; j < messages.length; ++j) {
+                var existing = $(messages.get(j));
+                if (created < existing.data("created")) {
+                    existing.before(message);
+                    break;
+                }
+            }
+        }
     }
 }
 
@@ -112,9 +141,9 @@ function renderNewMessages(body, display) {
 function pullMessages() {
     var display = $("#chat .messages");
     var data = { topic: $("#message-form input[name=topic]").val(),
-                 'X-Cache-Date': display.data("x-cache-date") };
+                 'KnownIds': findIdsOfRecentMessages() };
 
-    console.log("pullMessage 1 start: cache " + display.data("x-cache-date"));
+    console.log("pullMessage 1 start: cache " + data.KnownIds);
     $.ajax({
         url: "/api/get",
         dataType: 'json',
@@ -123,7 +152,6 @@ function pullMessages() {
                 displayError(display, body);
             } else if (body instanceof Array && body.length) {
                 renderNewMessages(body, display);
-                display.data('x-cache-date', body[body.length - 1].created);
             }
             scheduleFunction(pullMessages);
         },
